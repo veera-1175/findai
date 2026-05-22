@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}History{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+  <div>
+    <h1 class="page-title" style="margin-bottom:4px">History</h1>
+    <p class="page-lead" style="margin:0">{{ total_scans }} check{{ 's' if total_scans != 1 else '' }} saved on this device</p>
+  </div>
+  {% if scans %}
+  <form action="/history/clear" method="post" data-confirm="This will permanently delete all saved checks on this device.">
+    <button type="submit" class="btn btn-secondary" style="width:auto;font-size:13px">Clear all</button>
+  </form>
+  {% endif %}
+</div>
+
+{% if scans %}
+<div class="card" style="overflow:hidden">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>File</th>
+        <th>Result</th>
+        <th>Confidence</th>
+        <th>Date</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for scan in scans %}
+      <tr>
+        <td>
+          <a href="/result/{{ scan.scan_id }}">{{ scan.filename or 'Text' }}</a>
+          <div style="font-size:11px;color:var(--ink-faint)">{{ scan.content_type.value }}</div>
+        </td>
+        <td><span class="verdict-badge verdict-{{ scan.verdict.value }}">{{ scan.verdict_label }}</span></td>
+        <td>{{ scan.confidence_percent }}%</td>
+        <td style="font-size:12px;color:var(--ink-faint)">{{ scan.metadata.get('scanned_at', '')[:16] | replace('T', ' ') }}</td>
+        <td>
+          <form action="/history/{{ scan.scan_id }}/delete" method="post" style="display:inline" data-confirm="Delete this check from history?">
+            <button type="submit" class="btn-delete">delete</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card card-pad" style="text-align:center;padding:48px">
+  <p style="color:var(--ink-faint);margin-bottom:16px">No checks yet.</p>
+  <a href="/" class="btn btn-primary" style="width:auto;display:inline-flex">Run your first check</a>
+</div>
+{% endif %}
+{% endblock %}

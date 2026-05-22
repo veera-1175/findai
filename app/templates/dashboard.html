@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<header class="page-header animate-in">
+  <h1 class="page-title">Analytics dashboard</h1>
+  <p class="page-lead">Overview of all checks run on this device — verdicts, content types, and engine status.</p>
+</header>
+
+<div class="stat-grid animate-in animate-in-delay-1">
+  <div class="stat-card">
+    <span class="stat-value">{{ stats.total }}</span>
+    <span class="stat-label">Total checks</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value">{{ stats.avg_confidence }}%</span>
+    <span class="stat-label">Avg confidence</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value">{{ stats.by_type | length }}</span>
+    <span class="stat-label">Content types used</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-value">5</span>
+    <span class="stat-label">Detection modules</span>
+  </div>
+</div>
+
+<div class="two-col" style="margin-top:24px">
+  <section class="card card-pad animate-in animate-in-delay-2">
+    <h2 class="card-title">Verdict breakdown</h2>
+    {% set verdict_labels = {
+      'authentic': 'Likely authentic',
+      'uncertain': 'Uncertain',
+      'ai_generated': 'AI-generated',
+      'ai_edited': 'AI-edited'
+    } %}
+    {% if stats.by_verdict %}
+      {% for key, count in stats.by_verdict.items() %}
+      <div class="bar-stat">
+        <div class="bar-stat-header">
+          <span>{{ verdict_labels.get(key, key) }}</span>
+          <span>{{ count }}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill bar-mid" style="width:{{ (count / stats.total * 100) | int if stats.total else 0 }}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="field-hint">No scans yet — run a check to populate analytics.</p>
+    {% endif %}
+  </section>
+
+  <section class="card card-pad animate-in animate-in-delay-2">
+    <h2 class="card-title">Content types</h2>
+    {% if stats.by_type %}
+      {% for key, count in stats.by_type.items() %}
+      <div class="bar-stat">
+        <div class="bar-stat-header">
+          <span>{{ key | title }}</span>
+          <span>{{ count }}</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill bar-low" style="width:{{ (count / stats.total * 100) | int if stats.total else 0 }}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="field-hint">No data yet.</p>
+    {% endif %}
+  </section>
+</div>
+
+<section class="card card-pad animate-in animate-in-delay-3" style="margin-top:20px">
+  <h2 class="card-title">Detection engines</h2>
+  <div class="engine-grid">
+    {% for name, info in models.items() %}
+    <div class="engine-card">
+      <div class="engine-name">{{ name | title }}</div>
+      <div class="engine-status {% if info.loaded %}engine-on{% else %}engine-off{% endif %}">
+        {{ 'Ready' if info.loaded else 'Not loaded' }}
+      </div>
+      <p class="engine-detail">{{ info.get('model_id') or info.get('engine', '—') }}</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% if stats.recent %}
+<section class="card card-pad animate-in animate-in-delay-3" style="margin-top:20px">
+  <h2 class="card-title">Recent activity</h2>
+  <table class="data-table">
+    <thead><tr><th>File</th><th>Type</th><th>Verdict</th><th>Confidence</th></tr></thead>
+    <tbody>
+      {% for row in stats.recent %}
+      <tr>
+        <td><a href="/result/{{ row.scan_id }}">{{ row.filename or 'Text' }}</a></td>
+        <td>{{ row.content_type }}</td>
+        <td><span class="verdict-badge verdict-{{ row.verdict }}">{{ row.verdict.replace('_', ' ') | title }}</span></td>
+        <td>{{ (row.confidence * 100) | int }}%</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+<div class="row-actions" style="margin-top:24px">
+  <a href="/" class="btn btn-primary" style="width:auto;margin:0">New check</a>
+  <a href="/docs" class="btn btn-secondary" target="_blank">API docs</a>
+  <a href="/api/stats" class="btn btn-secondary" target="_blank">JSON stats</a>
+</div>
+{% endblock %}
