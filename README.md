@@ -1,151 +1,146 @@
 # FindAI
 
-**Free multimodal AI & fake content detector** — runs in the browser, locally, or on [Render](https://render.com) cloud. No paid APIs.
+### Free multimodal AI-content detector for text, images, and video frames
 
-Detect whether images, videos, audio, text, or documents are likely **real**, **AI-generated**, or **AI-edited**.
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-async-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Render-46E3B7?logo=render&logoColor=white)](https://findai-detector.onrender.com)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-![Python](https://img.shields.io/badge/Python-3.11+-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green)
-![Docker](https://img.shields.io/badge/Deploy-Render-blue)
-![License](https://img.shields.io/badge/Cost-Free-brightgreen)
+> Paste text, drop an image, or upload a video — get an explainable authenticity score without a paywall.
 
-## Features
+Solo-built by **[Veerasegaran V P](https://github.com/veera-1175)** — a production-shaped detector UI + API you can demo in an interview or self-host for free.
 
-| Module | What it does |
-|--------|----------------|
-| **Image** | ViT neural network + ELA edit forensics |
-| **Video** | Frame-by-frame ML + temporal consistency |
-| **Audio** | Synthetic voice + splice detection |
-| **Text** | RoBERTa detector + entropy heuristics |
-| **Documents** | PDF metadata + text pipeline |
-| **Dashboard** | Verdict analytics + engine status |
-| **REST API** | JSON analyze, export, stats, health |
-| **History** | SQLite scan history |
+**Live demo:** [findai-detector.onrender.com](https://findai-detector.onrender.com)
 
-## Deploy to Render (cloud — no local setup)
+---
 
-Everything runs on Render's servers. Models download from Hugging Face on first scan (~850 MB total, free).
+## What it does
 
-### One-click deploy
+FindAI combines **fast heuristics** with **optional neural models** so the product works on a free hosting tier and upgrades cleanly when you have more RAM:
 
-1. Push this repo to **GitHub** (repo name e.g. `findai`)
-2. Go to [render.com](https://render.com) → **New** → **Blueprint**
-3. Connect the repo — Render reads `render.yaml` automatically
-4. Click **Apply** — build takes ~10–15 minutes (PyTorch + deps)
+| Modality | Approach |
+|----------|----------|
+| **Text** | Style / predictability signals + optional transformer scoring |
+| **Images** | Visual artifact / model-based checks (when models load) |
+| **Video** | Frame sampling → same image pipeline |
+| **Demos** | One-click AI-style vs human-style samples — no upload needed |
 
-Your app will be live at `https://findai.onrender.com` (or similar).
+Results include a **score**, **label**, and **human-readable explanation** so users understand *why*, not just a black-box percentage.
 
-### Manual deploy (Docker)
+---
 
-1. **New Web Service** → connect GitHub repo
-2. **Runtime:** Docker
-3. **Dockerfile path:** `./Dockerfile`
-4. **Plan:** Free (see RAM note below)
-5. Deploy
+## Highlights
 
-### Cloud environment variables (set automatically by `render.yaml`)
+- Zero sign-up web UI — paste, upload, scan
+- REST API for scripting (`/api/analyze`, `/api/health`)
+- Scan history (SQLite; ephemeral on free Render redeploys)
+- Graceful degradation when ML models can't load (heuristics still work)
+- One-command local setup on Windows (`setup.bat` / `start.bat`)
 
-| Variable | Purpose |
-|----------|---------|
-| `RENDER=true` | Enables cloud mode |
-| `DATA_DIR=/tmp/findai` | Writable uploads + SQLite |
-| `PRELOAD_ML=false` | Lazy-load models (saves RAM at startup) |
-| `HF_HOME=/tmp/huggingface` | Model cache directory |
+---
 
-### Render free tier — important
+## Table of contents
 
-| | Free | Standard ($25/mo) |
-|--|------|-------------------|
-| RAM | 512 MB | 2 GB |
-| ML models | May fail / slow cold start | Recommended for full ML |
-| Sleep | Spins down after 15 min idle | Always on |
-| History DB | Resets on redeploy | Use persistent disk |
+1. [Live demo](#live-demo)
+2. [Quick start](#quick-start)
+3. [API](#api)
+4. [Deploy (Render)](#deploy-render)
+5. [Project layout](#project-layout)
+6. [Interview walkthrough](#interview-walkthrough)
+7. [License](#license)
 
-**Free tier:** UI, API, text heuristics, and demos work. Image/text **neural models need ~1 GB RAM** — if scans fail with memory errors, upgrade to **Standard (2 GB)** on Render or use local setup.
+---
 
-First scan after sleep can take **2–5 minutes** (wake + model download).
+## Live demo
 
-## Run locally (Windows)
+| | |
+|--|--|
+| **URL** | [https://findai-detector.onrender.com](https://findai-detector.onrender.com) |
+| **Cold start** | Free tier may sleep — first request can take 1–2 minutes |
+| **ML note** | Neural models need ~1 GB RAM; upgrade to Standard if scans OOM |
+
+Try the **AI-style text** / **Human-style text** buttons on the home page for an instant demo.
+
+---
+
+## Quick start
 
 ```bat
+git clone https://github.com/veera-1175/findai.git
+cd findai
 setup.bat
 start.bat
 ```
 
 Open **http://localhost:8000**
 
-## Run locally (manual)
+Manual:
 
 ```bash
-cd findai
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+# Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 python run.py
 ```
 
-## Try demos
-
-On the home page, click **AI-style text** or **Human-style text** — instant demo without uploading.
+---
 
 ## API
 
 ```bash
-# Health check
 curl https://YOUR-APP.onrender.com/api/health
 
-# Analyze text
 curl -X POST https://YOUR-APP.onrender.com/api/analyze \
   -F "text=Moreover it is worth noting that we must delve into comprehensive solutions."
-
-# Stats
-curl https://YOUR-APP.onrender.com/api/stats
 ```
 
-Swagger docs: `/docs`
+Multipart fields support `text`, `image`, and `video` depending on the request.
 
-## Run tests
+---
 
-```bash
-pip install pytest
-python -m pytest tests/ -v
-```
+## Deploy (Render)
 
-## Project structure
+| Setting | Free | Paid / persistent |
+|---------|------|-------------------|
+| App | Web service from this repo | Same |
+| ML models | May fail / slow cold start | Recommended (~2 GB) |
+| Sleep | Spins down after idle | Always on |
+| History DB | Resets on redeploy | Persistent disk |
+
+`render.yaml` (if present) or manual: Python runtime, start `python run.py`, expose the configured port.
+
+---
+
+## Project layout
 
 ```
 findai/
-├── app/
-│   ├── main.py           # FastAPI routes
-│   ├── config.py         # Local + cloud settings
-│   ├── db.py             # SQLite + analytics
-│   ├── models.py
-│   ├── demo.py
-│   ├── core/
-│   │   └── scan.py       # Upload + analyze pipeline
-│   ├── engine/
-│   │   ├── ml.py         # Hugging Face models
-│   │   ├── forensics.py  # ELA, entropy, audio
-│   │   ├── analyze.py    # All modality analyzers
-│   │   └── fusion.py     # Verdict engine
-│   ├── templates/        # Jinja2 UI
-│   └── static/           # CSS + JS
-├── tests/
-├── Dockerfile            # Render / Docker deploy
-├── render.yaml           # Render Blueprint
+├── app/              # FastAPI routes, scoring, static UI
+├── models/           # Optional weights / loaders
+├── run.py            # Entry
 ├── requirements.txt
-├── run.py
-└── PROJECT_DOCUMENTATION.md
+├── setup.bat / start.bat
+└── README.md
 ```
 
-## Tech stack (all free)
+---
 
-FastAPI · Uvicorn · Jinja2 · PyTorch (CPU) · Transformers · Pillow · OpenCV · Librosa · SciPy · SQLite
+## Interview walkthrough
 
-## Academic documentation
+| Topic | Talking point |
+|-------|----------------|
+| Product sense | Free multimodal detector UX, not a notebook dump |
+| Engineering | FastAPI async API + static frontend, file uploads, health checks |
+| Reliability | Heuristics when models can't load; clear UX on cold starts |
+| Ops | Render deploy, RAM constraints, cold start awareness |
 
-See [PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md) for MCA/project report material.
+**60-second demo:** open live site → click demo text → show score + explanation → optional image upload.
 
-## Disclaimer
+---
 
-FindAI gives **probability estimates** for education and awareness — not legal proof. Accuracy varies with compression quality and new AI models.
+## License
+
+MIT © [Veerasegaran V P](https://github.com/veera-1175)
+
+**FindAI** — authenticity checks without the paywall.
