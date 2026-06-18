@@ -72,13 +72,15 @@ def _ai_from_probs(probs: dict[str, float], ai_keys: tuple[str, ...], real_keys:
 
 
 def model_status(kind: str) -> dict[str, Any]:
+    from app.config import ML_ENABLED
     slot = _slots[kind]
     model_id = IMAGE_MODEL if kind == "image" else TEXT_MODEL
     return {
         "model_id": model_id,
         "loaded": slot["model"] is not None,
+        "enabled": ML_ENABLED,
         "error": slot["error"],
-        "provider": "Hugging Face (free, local)",
+        "provider": "Hugging Face (free, local)" if ML_ENABLED else "Disabled on cloud (heuristics only)",
     }
 
 
@@ -106,6 +108,9 @@ def preload_all() -> dict[str, bool]:
 
 
 def predict_ai_image(img) -> tuple[float, str, dict[str, Any]]:
+    from app.config import ML_ENABLED
+    if not ML_ENABLED:
+        return 0.45, "Neural model disabled in cloud mode — using forensics heuristics", {"disabled": True, "cloud": True}
     try:
         import torch
         _load_image()
@@ -145,7 +150,10 @@ def _text_chunks(text: str) -> list[str]:
 
 
 def predict_ai_text(text: str) -> tuple[float, str, dict[str, Any]]:
+    from app.config import ML_ENABLED
     text = text.strip()
+    if not ML_ENABLED:
+        return 0.45, "Neural model disabled in cloud mode — using text heuristics", {"disabled": True, "cloud": True}
     if len(text) < 20:
         return 0.35, "Text too short for neural network analysis", {"skipped": True}
     try:

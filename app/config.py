@@ -20,6 +20,7 @@ HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", "8000"))
 DEBUG = os.getenv("DEBUG", "false" if IS_CLOUD else "true").lower() == "true"
 PRELOAD_ML = os.getenv("PRELOAD_ML", "false" if IS_CLOUD else "true").lower() == "true"
+ML_ENABLED = os.getenv("ML_ENABLED", "false" if IS_CLOUD else "true").lower() == "true"
 
 MAX_FILE_SIZE = int(os.getenv("MAX_FILE_SIZE", str(50 * 1024 * 1024 if IS_CLOUD else 100 * 1024 * 1024)))
 

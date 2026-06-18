@@ -24,5 +24,5 @@ services:
         value: /tmp/huggingface
       - key: TRANSFORMERS_CACHE
         value: /tmp/huggingface
-      - key: MAX_FILE_SIZE
-        value: "52428800"
+      - key: ML_ENABLED
+        value: "false"
