@@ -1,0 +1,28 @@
+# Render Blueprint — deploy FindAI from GitHub
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: findai
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /api/health
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: RENDER
+        value: "true"
+      - key: CLOUD
+        value: "true"
+      - key: DEBUG
+        value: "false"
+      - key: PRELOAD_ML
+        value: "false"
+      - key: DATA_DIR
+        value: /tmp/findai
+      - key: HF_HOME
+        value: /tmp/huggingface
+      - key: TRANSFORMERS_CACHE
+        value: /tmp/huggingface
+      - key: MAX_FILE_SIZE
+        value: "52428800"

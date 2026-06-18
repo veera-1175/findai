@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Result{% endblock %}
+
+{% block content %}
+<p style="margin-bottom:20px" class="animate-in"><a href="/" class="btn-ghost">← New check</a></p>
+
+<section class="card card-pad submitted-panel animate-in">
+  <h2 class="card-title">What you checked</h2>
+
+  <div class="submitted-header">
+    <span class="submitted-type-badge">{{ result.content_type.value }}</span>
+    <strong class="submitted-name">{{ result.preview.label or result.filename or 'Pasted text' }}</strong>
+  </div>
+
+  {% if result.preview.image_thumb %}
+  <div class="submitted-media">
+    <img src="data:image/jpeg;base64,{{ result.preview.image_thumb }}" alt="Uploaded preview" class="submitted-image">
+    {% if result.preview.preview_note %}
+    <p class="field-hint">{{ result.preview.preview_note }}</p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if result.preview.text_excerpt or result.preview.text %}
+  <div class="submitted-text">
+    <p class="submitted-text-label">Text content</p>
+    <blockquote class="text-quote">{{ result.preview.text_excerpt or result.preview.text }}</blockquote>
+    {% if result.preview.char_count %}
+    <p class="field-hint">{{ result.preview.char_count }} characters · {{ result.preview.word_count }} words</p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  {% if not result.preview.image_thumb and not result.preview.text and not result.preview.text_excerpt %}
+  <div class="submitted-file-info">
+    {% if result.preview.file_size_label %}
+    <p>File size: <strong>{{ result.preview.file_size_label }}</strong></p>
+    {% endif %}
+    {% if result.preview.duration %}
+    <p>Duration: <strong>{{ result.preview.duration }} seconds</strong></p>
+    {% endif %}
+    {% if result.preview.sample_rate %}
+    <p>Sample rate: <strong>{{ result.preview.sample_rate }} Hz</strong></p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <dl class="submitted-meta">
+    {% if result.preview.file_size_label %}
+    <div><dt>Size</dt><dd>{{ result.preview.file_size_label }}</dd></div>
+    {% endif %}
+    {% if result.preview.dimensions %}
+    <div><dt>Size (px)</dt><dd>{{ result.preview.dimensions }}</dd></div>
+    {% endif %}
+    {% if result.preview.duration %}
+    <div><dt>Length</dt><dd>{{ result.preview.duration }}s</dd></div>
+    {% endif %}
+    {% if result.preview.resolution %}
+    <div><dt>Resolution</dt><dd>{{ result.preview.resolution }}</dd></div>
+    {% endif %}
+    {% if result.scanned_at %}
+    <div><dt>Checked</dt><dd>{{ result.scanned_at }} UTC</dd></div>
+    {% endif %}
+  </dl>
+</section>
+
+<div class="result-grid animate-in animate-in-delay-1" style="margin-top:20px">
+  <aside class="card card-pad verdict-panel animate-in animate-in-delay-2">
+    <p class="card-title" style="margin-bottom:0">Verdict</p>
+    <div class="confidence-big">{{ result.confidence_percent }}%</div>
+    <p class="confidence-label">confidence</p>
+    <div class="verdict-badge-lg verdict-{{ result.verdict.value }}" style="margin:16px 0">
+      {{ result.verdict_label }}
+    </div>
+    <div class="scan-id">ID {{ result.scan_id }}</div>
+  </aside>
+
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <section class="card card-pad">
+      <h2 class="card-title">Why we think this</h2>
+      <ul class="findings-list">
+        {% for reason in result.reasons %}
+        <li>{{ reason }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="card card-pad">
+      <h2 class="card-title">Checks that ran</h2>
+      {% for signal in result.signals %}
+      <div class="signal-row">
+        <div class="signal-header">
+          <span>{{ signal.label }}</span>
+          <span>{{ (signal.score * 100) | int }}%</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill {% if signal.score >= 0.55 %}bar-high{% elif signal.score >= 0.35 %}bar-mid{% else %}bar-low{% endif %}"
+               style="width:{{ (signal.score * 100) | int }}%"></div>
+        </div>
+        <p class="signal-detail">{{ signal.detail }}</p>
+      </div>
+      {% endfor %}
+    </section>
+
+    <section class="card card-pad tech-panel">
+      <h2 class="card-title">Analysis details</h2>
+      <dl class="tech-grid">
+        {% for row in result.technical_info %}
+        <div class="tech-row">
+          <dt>{{ row.label }}</dt>
+          <dd>{{ row.value }}</dd>
+        </div>
+        {% endfor %}
+      </dl>
+
+      {% if result.metadata.ml %}
+      <div class="tech-models">
+        <p class="submitted-text-label">Detection engines</p>
+        <ul class="detect-list" style="margin-top:8px">
+          {% if result.metadata.ml.model %}
+          <li><strong>Model</strong> — {{ result.metadata.ml.model }}
+            {% if result.metadata.ml.ai_probability is defined %}
+            ({{ (result.metadata.ml.ai_probability * 100) | int }}% AI score)
+            {% endif %}
+          </li>
+          {% endif %}
+          {% if result.metadata.ml.segments %}
+          <li><strong>Segments analyzed</strong> — {{ result.metadata.ml.segments }}</li>
+          {% endif %}
+        </ul>
+      </div>
+      {% endif %}
+
+      {% if result.signals %}
+      <details class="tech-raw">
+        <summary>All signal scores (technical)</summary>
+        <table class="signal-table">
+          <thead>
+            <tr><th>Check</th><th>Score</th><th>Detail</th></tr>
+          </thead>
+          <tbody>
+            {% for signal in result.signals %}
+            <tr>
+              <td>{{ signal.label }}</td>
+              <td>{{ (signal.score * 100) | int }}%</td>
+              <td>{{ signal.detail }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </details>
+      {% endif %}
+    </section>
+
+    {% if result.limitations %}
+    <div class="notice-box">
+      <h3>Note</h3>
+      <ul>
+        {% for lim in result.limitations %}
+        <li>{{ lim }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <div class="row-actions">
+      <a href="/" class="btn btn-secondary">Check another</a>
+      <a href="/result/{{ scan_id }}/export" class="btn btn-secondary" target="_blank">Export JSON</a>
+      <button type="button" class="btn btn-secondary" data-copy-link>Copy link</button>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+This folder was renamed to FindAI.
+
+The project now lives at:
+
+  v:\Projects\findai
+
+Stop this server (Ctrl+C), then delete this old `veriscan` folder if you no longer need it.
+
+Run from the new folder:
+  cd v:\Projects\findai
+  setup.bat
+  start.bat
+
+Deploy to Render: push the `findai` folder to GitHub and use render.yaml.

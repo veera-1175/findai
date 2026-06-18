@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Check content{% endblock %}
+
+{% block content %}
+<header class="page-header animate-in">
+  <h1 class="page-title">Find AI in your content</h1>
+  <p class="page-lead">Multimodal detection — images, video, audio, text, and documents. ML models + digital forensics, 100% free and local.</p>
+</header>
+
+{% if stats.total %}
+<div class="stat-grid animate-in animate-in-delay-1" style="margin-bottom:24px">
+  <div class="stat-card"><span class="stat-value">{{ stats.total }}</span><span class="stat-label">Checks run</span></div>
+  <div class="stat-card"><span class="stat-value">{{ stats.avg_confidence }}%</span><span class="stat-label">Avg confidence</span></div>
+  <div class="stat-card"><span class="stat-value">5</span><span class="stat-label">Modules active</span></div>
+  <a href="/dashboard" class="stat-card stat-link"><span class="stat-value">→</span><span class="stat-label">View dashboard</span></a>
+</div>
+{% endif %}
+
+<section class="feature-grid animate-in animate-in-delay-1">
+  <div class="feature-item"><strong>Image ML</strong><span>ViT detector + ELA forensics</span></div>
+  <div class="feature-item"><strong>Video</strong><span>Frame analysis + temporal checks</span></div>
+  <div class="feature-item"><strong>Audio</strong><span>Voice clone + splice detection</span></div>
+  <div class="feature-item"><strong>Text ML</strong><span>RoBERTa + entropy heuristics</span></div>
+  <div class="feature-item"><strong>Documents</strong><span>PDF metadata + text pipeline</span></div>
+  <div class="feature-item"><strong>REST API</strong><span>JSON endpoints + export</span></div>
+</section>
+
+<div class="two-col" style="margin-top:24px">
+  <section class="card card-pad animate-in animate-in-delay-1">
+    <form action="/analyze" method="post" enctype="multipart/form-data" id="scan-form">
+      <div class="tab-bar">
+        <button type="button" data-tab="file" class="tab-btn active">Upload file</button>
+        <button type="button" data-tab="text" class="tab-btn">Paste text</button>
+      </div>
+
+      <div id="panel-file" class="tab-panel">
+        <div id="dropzone" class="dropzone">
+          <input type="file" name="file" id="file-input" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%" accept=".jpg,.jpeg,.png,.webp,.gif,.bmp,.mp4,.mov,.avi,.webm,.mkv,.mp3,.wav,.m4a,.ogg,.flac,.pdf,.docx,.txt">
+          <div class="dropzone-icon">📎</div>
+          <p class="dropzone-title">Drop a file here</p>
+          <p class="dropzone-hint">or click to choose from your computer</p>
+          <p id="file-name" class="hidden"></p>
+        </div>
+        <div class="format-tags">
+          <span>Images</span><span>Video</span><span>Audio</span><span>PDF</span><span>DOCX</span>
+        </div>
+      </div>
+
+      <div id="panel-text" class="tab-panel hidden">
+        <textarea name="text" id="text-input" class="text-input" placeholder="Paste the text you want to check…"></textarea>
+        <p class="field-hint">Works best with 50+ characters.</p>
+      </div>
+
+      <button type="submit" id="submit-btn" class="btn btn-primary">Run check</button>
+    </form>
+  </section>
+
+  <aside style="display:flex;flex-direction:column;gap:16px">
+    <div class="card card-pad animate-in animate-in-delay-2">
+      <h2 class="card-title">Try a sample</h2>
+      <div class="demo-list">
+        {% for sample in demo_samples %}
+        <form action="/demo/{{ sample['id'] }}" method="post">
+          <button type="submit" class="demo-btn">
+            <strong>{{ sample.label }}</strong>
+            <span>{{ sample.description }}</span>
+          </button>
+        </form>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="card card-pad animate-in animate-in-delay-3">
+      <h2 class="card-title">What we flag</h2>
+      <ul class="detect-list">
+        <li><strong>AI-generated</strong> — made entirely by AI</li>
+        <li><strong>AI-edited</strong> — real content that was changed</li>
+        <li><strong>Authentic</strong> — nothing suspicious found</li>
+      </ul>
+    </div>
+
+    {% if recent_scans %}
+    <div class="card card-pad">
+      <h2 class="card-title" style="display:flex;justify-content:space-between">
+        Recent <a href="/history" class="text-link" style="font-size:12px;text-transform:none;letter-spacing:0">all</a>
+      </h2>
+      {% for scan in recent_scans %}
+      <a href="/result/{{ scan.scan_id }}" class="recent-link">
+        <span>{{ scan.filename or 'Text' }}</span>
+        <span class="verdict-badge verdict-{{ scan.verdict.value }}">{{ scan.verdict_label }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

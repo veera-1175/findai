@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}FindAI{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a href="/" class="logo">
+        <span class="logo-mark">F</span>
+        <span class="logo-text">Find<span>AI</span></span>
+      </a>
+      <nav class="nav">
+        <a href="/">Check</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/history">History</a>
+        <a href="/about">About</a>
+        <a href="/docs" target="_blank">API</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap main-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>FindAI gives estimates for awareness — not legal proof. Runs offline after models download.</p>
+    </div>
+  </footer>
+
+  <!-- Scanning overlay -->
+  <div id="scan-overlay" class="overlay" aria-hidden="true">
+    <div class="overlay-panel" role="dialog" aria-labelledby="scan-overlay-title">
+      <div class="overlay-spinner" aria-hidden="true"></div>
+      <p class="overlay-title" id="scan-overlay-title">Analyzing content</p>
+      <p class="overlay-text">Running detection models on your upload…</p>
+    </div>
+  </div>
+
+  <!-- Generic popup -->
+  <div id="popup-overlay" class="overlay" aria-hidden="true">
+    <div class="overlay-panel" role="dialog" aria-labelledby="popup-title">
+      <p class="overlay-title" id="popup-title">Notice</p>
+      <p class="overlay-text" id="popup-message"></p>
+      <div class="overlay-actions">
+        <button type="button" class="btn btn-primary" id="popup-ok" style="width:auto;margin:0">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <script src="/static/js/app.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

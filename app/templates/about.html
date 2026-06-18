@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+
+{% block content %}
+<h1 class="page-title">About FindAI</h1>
+  <p class="page-lead">A free student project — runs locally or on Render cloud. No paid APIs. Checks photos, videos, audio, text, and documents for AI content.</p>
+  {% if is_cloud %}<p class="field-hint">Running in cloud mode — models load on first scan.</p>{% endif %}
+
+<div style="display:flex;flex-direction:column;gap:16px;max-width:720px">
+  <section class="card card-pad">
+    <h2 class="card-title">Architecture</h2>
+    <ul class="detect-list">
+      <li><strong>app/engine/</strong> — ML models, forensics, fusion, analyzers</li>
+      <li><strong>app/core/</strong> — scan pipeline + upload preview</li>
+      <li><strong>app/db.py</strong> — SQLite history + analytics</li>
+      <li><strong>FastAPI</strong> — web UI, REST API, Swagger docs at /docs</li>
+    </ul>
+  </section>
+
+  <section class="card card-pad">
+    <h2 class="card-title">How it works</h2>
+    <ol style="margin:0;padding-left:20px;color:var(--ink-muted);font-size:14px;line-height:1.8">
+      <li>You upload a file or paste text</li>
+      <li>The app picks the right checker (image, audio, video, text, or document)</li>
+      <li>Several free tools run — neural networks plus forensic checks</li>
+      <li>You get one verdict with a confidence score and short explanation</li>
+    </ol>
+  </section>
+
+  <section class="card card-pad">
+    <h2 class="card-title">Tools used (all free)</h2>
+    <ul class="detect-list">
+      <li><strong>Images</strong> — Organika/sdxl-detector (ViT model) + edit forensics</li>
+      <li><strong>Text</strong> — roberta-base-openai-detector + phrase analysis</li>
+      <li><strong>Audio</strong> — librosa pitch analysis + splice detection</li>
+      <li><strong>Video</strong> — frame-by-frame image model + temporal checks</li>
+      <li><strong>Documents</strong> — PDF metadata + text model</li>
+    </ul>
+  </section>
+
+  <div class="notice-box">
+    <h3>Keep in mind</h3>
+    <p style="margin:0">This gives probability estimates, not proof. Compressed WhatsApp forwards and very new AI models are harder to catch. Use results as a guide, not a final answer.</p>
+  </div>
+</div>
+{% endblock %}
