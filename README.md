@@ -8,8 +8,7 @@
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > Paste text, drop an image, or upload a video — get an explainable authenticity score without a paywall.
-
-Built by **[Veera](https://github.com/veera-1175)**.
+> Built by [Veera](https://github.com/veera-1175).
 
 **Live demo:** [findai-detector.onrender.com](https://findai-detector.onrender.com)
 
