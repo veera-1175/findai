@@ -9,7 +9,7 @@
 
 > Paste text, drop an image, or upload a video — get an explainable authenticity score without a paywall.
 
-Built by **[veera](https://github.com/veera-1175)**.
+Built by **[Veera](https://github.com/veera-1175)**.
 
 **Live demo:** [findai-detector.onrender.com](https://findai-detector.onrender.com)
 
@@ -141,6 +141,6 @@ findai/
 
 ## License
 
-MIT © [veera](https://github.com/veera-1175)
+MIT © [Veera](https://github.com/veera-1175)
 
 **FindAI** — authenticity checks without the paywall.
